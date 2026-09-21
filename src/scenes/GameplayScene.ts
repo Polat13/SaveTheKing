@@ -44,6 +44,10 @@ import {
   CombatAnimationController,
 } from "../controllers/CombatAnimationController";
 
+import {
+  Localization,
+} from "../localization/Localization";
+
 export class GameplayScene
   extends Container
   implements Scene
@@ -62,7 +66,7 @@ export class GameplayScene
   private readonly screenShake: ScreenShake;
 
   private readonly combatAnimationController:
-  CombatAnimationController;
+    CombatAnimationController;
 
   private readonly attackButton: Button;
 
@@ -76,20 +80,24 @@ export class GameplayScene
 
   private readonly screenWidth: () => number;
   private readonly screenHeight: () => number;
+  private readonly localization: Localization;
 
   constructor(
-  screenWidth: () => number,
-  screenHeight: () => number,
-  onWin: () => void,
-  onLose: () => void,
-) {
+    screenWidth: () => number,
+    screenHeight: () => number,
+    localization: Localization,
+    onWin: () => void,
+    onLose: () => void,
+  ) {
     super();
 
     this.screenWidth = screenWidth;
     this.screenHeight = screenHeight;
 
+    this.localization = localization;
+
     this.onWin = onWin;
-this.onLose = onLose;
+    this.onLose = onLose;
 
     // --------------------------------------------------
     // Containers
@@ -110,20 +118,20 @@ this.onLose = onLose;
     // --------------------------------------------------
 
     this.animationSystem =
-  new AnimationSystem();
+      new AnimationSystem();
 
     this.hitReactionSystem =
-  new HitReactionSystem();
+      new HitReactionSystem();
 
-this.screenShake =
-  new ScreenShake();
+    this.screenShake =
+      new ScreenShake();
 
-this.combatAnimationController =
-  new CombatAnimationController(
-    this.animationSystem,
-    this.player,
-    this.enemy,
-  );
+    this.combatAnimationController =
+      new CombatAnimationController(
+        this.animationSystem,
+        this.player,
+        this.enemy,
+      );
 
     // --------------------------------------------------
     // Effects
@@ -140,21 +148,27 @@ this.combatAnimationController =
       new HealthBar({
         width: 140,
         height: 18,
-        label: "KING",
+        label: this.localization.get(
+          "gameplay.king",
+        ),
       });
 
     this.enemyHealthBar =
       new HealthBar({
         width: 140,
         height: 18,
-        label: "ENEMY",
+        label: this.localization.get(
+          "gameplay.enemy",
+        ),
       });
 
     this.attackButton =
       new Button({
         width: 180,
         height: 60,
-        label: "ATTACK",
+        label: this.localization.get(
+          "gameplay.attack",
+        ),
         onClick: () => this.attack(),
       });
 
@@ -168,9 +182,9 @@ this.combatAnimationController =
         this.enemy,
         {
           onPlayerAttack: () => {
-          this.combatAnimationController
-          .playPlayerAttack();
-        },
+            this.combatAnimationController
+              .playPlayerAttack();
+          },
 
           onPlayerHit: () => {
             this.updateHealthBars();
@@ -191,9 +205,9 @@ this.combatAnimationController =
           },
 
           onEnemyAttack: () => {
-  this.combatAnimationController
-    .playEnemyAttack();
-},
+            this.combatAnimationController
+              .playEnemyAttack();
+          },
 
           onEnemyHit: () => {
             this.updateHealthBars();
@@ -213,20 +227,20 @@ this.combatAnimationController =
             );
           },
 
-         onWin: () => {
-  this.attackButton.setEnabled(
-    false,
-  );
+          onWin: () => {
+            this.attackButton.setEnabled(
+              false,
+            );
 
-  this.onWin();
-},
+            this.onWin();
+          },
 
-onLose: () => {
-  this.attackButton.setEnabled(
-    false,
-  );
+          onLose: () => {
+            this.attackButton.setEnabled(
+              false,
+            );
 
-  this.onLose();
+            this.onLose();
           },
         },
       );
@@ -261,20 +275,20 @@ onLose: () => {
     );
 
     this.layout();
+    this.updateTexts();
   }
 
   enter(): void {
     this.visible = true;
 
     this.animationSystem.clear();
-
     this.hitReactionSystem.clear();
-
     this.screenShake.clear();
 
     this.combatSystem.reset();
 
     this.updateHealthBars();
+    this.updateTexts();
 
     this.attackButton.setEnabled(true);
 
@@ -285,27 +299,25 @@ onLose: () => {
     this.visible = false;
 
     this.animationSystem.clear();
-
     this.hitReactionSystem.clear();
-
     this.screenShake.clear();
   }
 
   update(delta: number): void {
-  this.combatSystem.update(delta);
+    this.combatSystem.update(delta);
 
-  this.animationSystem.update(delta);
+    this.animationSystem.update(delta);
 
-  this.hitReactionSystem.update(delta);
+    this.hitReactionSystem.update(delta);
 
-  this.hitEffect.update(delta);
+    this.hitEffect.update(delta);
 
-  this.screenShake.update(delta);
+    this.screenShake.update(delta);
 
-  this.playerHealthBar.update(delta);
+    this.playerHealthBar.update(delta);
 
-  this.enemyHealthBar.update(delta);
-}
+    this.enemyHealthBar.update(delta);
+  }
 
   layout(): void {
     const width =
@@ -380,6 +392,26 @@ onLose: () => {
     this.enemyHealthBar.setValue(
       this.enemy.hp,
       this.enemy.maxHp,
+    );
+  }
+
+  private updateTexts(): void {
+    this.playerHealthBar.setLabel(
+      this.localization.get(
+        "gameplay.king",
+      ),
+    );
+
+    this.enemyHealthBar.setLabel(
+      this.localization.get(
+        "gameplay.enemy",
+      ),
+    );
+
+    this.attackButton.setLabel(
+      this.localization.get(
+        "gameplay.attack",
+      ),
     );
   }
 

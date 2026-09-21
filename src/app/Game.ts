@@ -16,31 +16,20 @@ import {
   EndScene,
 } from "../scenes/EndScene";
 
+import {
+  Localization,
+} from "../localization/Localization";
+
 export class Game {
   private readonly app: Application;
 
   private readonly sceneManager: SceneManager;
 
+  private readonly localization: Localization;
+
   private readonly startScene: StartScene;
   private readonly gameplayScene: GameplayScene;
-
   private readonly endScene: EndScene;
-
-  private showEndScene(
-  isWin: boolean,
-): void {
-  this.endScene.showResult(isWin);
-
-  this.sceneManager.changeScene(
-    this.endScene,
-  );
-}
-
-private startGameplay(): void {
-  this.sceneManager.changeScene(
-    this.gameplayScene,
-  );
-}
 
   constructor(app: Application) {
     this.app = app;
@@ -48,38 +37,44 @@ private startGameplay(): void {
     this.sceneManager =
       new SceneManager();
 
-    this.gameplayScene =
-  new GameplayScene(
-    () => this.app.screen.width,
-    () => this.app.screen.height,
-    () => this.showEndScene(true),
-    () => this.showEndScene(false),
-  );
+    this.localization =
+      new Localization();
 
     this.startScene =
       new StartScene(
         () => this.app.screen.width,
         () => this.app.screen.height,
-        () => this.handlePlay(),
+        this.localization,
+        () => this.startGameplay(),
       );
 
-      this.endScene =
-  new EndScene(
+    this.gameplayScene =
+  new GameplayScene(
     () => this.app.screen.width,
     () => this.app.screen.height,
+    this.localization,
+    () => this.showEndScene(true),
+    () => this.showEndScene(false),
+  );
+
+    this.endScene =
+    new EndScene(
+    () => this.app.screen.width,
+    () => this.app.screen.height,
+    this.localization,
     () => this.startGameplay(),
   );
 
-   this.app.stage.addChild(
-  this.startScene,
-  this.gameplayScene,
-  this.endScene,
-);
+    this.app.stage.addChild(
+      this.startScene,
+      this.gameplayScene,
+      this.endScene,
+    );
 
-
-
-    // Oyun başlangıcında sadece start screen görünür.
+    // Only the start screen
+    // should be visible at startup.
     this.gameplayScene.visible = false;
+    this.endScene.visible = false;
 
     this.app.ticker.add(
       (ticker) => {
@@ -90,14 +85,14 @@ private startGameplay(): void {
     );
 
     this.app.renderer.on(
-  "resize",
-  () => {
-    this.startScene.layout();
-    this.gameplayScene.layout();
-    this.endScene.layout();
-  },
-);
-}
+      "resize",
+      () => {
+        this.startScene.layout();
+        this.gameplayScene.layout();
+        this.endScene.layout();
+      },
+    );
+  }
 
   start(): void {
     this.sceneManager.changeScene(
@@ -105,9 +100,19 @@ private startGameplay(): void {
     );
   }
 
-  private handlePlay(): void {
+  private startGameplay(): void {
     this.sceneManager.changeScene(
       this.gameplayScene,
+    );
+  }
+
+  private showEndScene(
+    isWin: boolean,
+  ): void {
+    this.endScene.showResult(isWin);
+
+    this.sceneManager.changeScene(
+      this.endScene,
     );
   }
 }

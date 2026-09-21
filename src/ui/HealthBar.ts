@@ -119,6 +119,15 @@ export class HealthBar extends Container {
       this.targetValue;
   }
 
+  setLabel(label: string): void {
+  const labelText =
+    this.getChildAt(2);
+
+  if (labelText instanceof Text) {
+    labelText.text = label;
+  }
+}
+
   private renderValue(): void {
     const ratio =
       this.maxValue > 0

@@ -7,6 +7,10 @@ import {
 
 import type { Scene } from "../app/SceneManager";
 
+import {
+  Localization,
+} from "../localization/Localization";
+
 export class EndScene
   extends Container
   implements Scene
@@ -17,6 +21,8 @@ export class EndScene
   private readonly screenHeight: () => number;
   private readonly onRestart: () => void;
 
+  private readonly localization: Localization;
+
   private readonly title: Text;
   private readonly subtitle: Text;
   private readonly restartButton: Container;
@@ -24,12 +30,14 @@ export class EndScene
   constructor(
     screenWidth: () => number,
     screenHeight: () => number,
+    localization: Localization,
     onRestart: () => void,
   ) {
     super();
 
     this.screenWidth = screenWidth;
     this.screenHeight = screenHeight;
+    this.localization = localization;
     this.onRestart = onRestart;
 
     this.title = this.createTitle();
@@ -45,7 +53,6 @@ export class EndScene
 
     this.layout();
 
-    // EndScene should be hidden until the game ends.
     this.visible = false;
   }
 
@@ -53,6 +60,7 @@ export class EndScene
     this.visible = true;
 
     this.layout();
+    this.updateTexts();
   }
 
   exit(): void {
@@ -66,13 +74,23 @@ export class EndScene
   showResult(isWin: boolean): void {
     this.title.text =
       isWin
-        ? "YOU WIN!"
-        : "YOU LOSE!";
+        ? this.localization.get(
+            "end.winTitle",
+          )
+        : this.localization.get(
+            "end.loseTitle",
+          );
 
     this.subtitle.text =
       isWin
-        ? "The king has been saved!"
-        : "The king has been defeated.";
+        ? this.localization.get(
+            "end.winSubtitle",
+          )
+        : this.localization.get(
+            "end.loseSubtitle",
+          );
+
+    this.updateRestartButtonText();
 
     this.layout();
   }
@@ -100,9 +118,27 @@ export class EndScene
     );
   }
 
+  private updateTexts(): void {
+    this.updateRestartButtonText();
+  }
+
+  private updateRestartButtonText(): void {
+    const restartLabel =
+      this.restartButton.getChildAt(1);
+
+    if (
+      restartLabel instanceof Text
+    ) {
+      restartLabel.text =
+        this.localization.get(
+          "end.playAgain",
+        );
+    }
+  }
+
   private createTitle(): Text {
     const title = new Text({
-      text: "YOU WIN!",
+      text: "",
       style: new TextStyle({
         fontFamily: "Arial",
         fontSize: 48,
@@ -119,7 +155,7 @@ export class EndScene
 
   private createSubtitle(): Text {
     const subtitle = new Text({
-      text: "The king has been saved!",
+      text: "",
       style: new TextStyle({
         fontFamily: "Arial",
         fontSize: 18,
@@ -150,7 +186,7 @@ export class EndScene
     background.fill("#facc15");
 
     const label = new Text({
-      text: "PLAY AGAIN",
+      text: "",
       style: new TextStyle({
         fontFamily: "Arial",
         fontSize: 20,

@@ -14,6 +14,7 @@ interface ButtonOptions {
 
 export class Button extends Container {
   private readonly background: Graphics;
+  private readonly labelText: Text;
 
   constructor(options: ButtonOptions) {
     super();
@@ -30,7 +31,7 @@ export class Button extends Container {
 
     this.background.fill("#facc15");
 
-    const label = new Text({
+    this.labelText = new Text({
       text: options.label,
       style: new TextStyle({
         fontFamily: "Arial",
@@ -41,28 +42,42 @@ export class Button extends Container {
       }),
     });
 
-    label.anchor.set(0.5);
+    this.labelText.anchor.set(0.5);
 
     this.addChild(
       this.background,
-      label,
+      this.labelText,
     );
 
     this.eventMode = "static";
     this.cursor = "pointer";
 
-    this.on("pointerdown", () => {
-      this.scale.set(0.94);
-    });
+    this.on(
+      "pointerdown",
+      () => {
+        this.scale.set(0.94);
+      },
+    );
 
-    this.on("pointerup", () => {
-      this.scale.set(1);
-      options.onClick();
-    });
+    this.on(
+      "pointerup",
+      () => {
+        this.scale.set(1);
 
-    this.on("pointerupoutside", () => {
-      this.scale.set(1);
-    });
+        options.onClick();
+      },
+    );
+
+    this.on(
+      "pointerupoutside",
+      () => {
+        this.scale.set(1);
+      },
+    );
+  }
+
+  setLabel(label: string): void {
+    this.labelText.text = label;
   }
 
   setEnabled(enabled: boolean): void {
