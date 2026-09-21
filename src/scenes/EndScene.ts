@@ -131,8 +131,8 @@ export class EndScene
     ) {
       restartLabel.text =
         this.localization.get(
-          "end.playAgain",
-        );
+        "end.upgrade",
+      );
     }
   }
 

@@ -4,9 +4,10 @@ import {
 } from "pixi.js";
 
 export class Player extends Container {
-  readonly maxHp = 3;
-
+  maxHp = 3;
   hp = this.maxHp;
+
+  attackDamage = 1;
 
   constructor() {
     super();
@@ -110,6 +111,16 @@ export class Player extends Container {
       sword,
       handle,
     );
+  }
+
+  applyStats(
+    maxHp: number,
+    attackDamage: number,
+  ): void {
+    this.maxHp = maxHp;
+    this.attackDamage = attackDamage;
+
+    this.hp = this.maxHp;
   }
 
   takeDamage(amount: number): void {

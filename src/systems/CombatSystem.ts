@@ -119,7 +119,9 @@ export class CombatSystem {
   private handlePlayerHit(): void {
     this.timer = 0;
 
-    this.enemy.takeDamage(1);
+    this.enemy.takeDamage(
+  this.player.attackDamage,
+);
 
     this.callbacks.onPlayerHit?.();
 
