@@ -30,6 +30,6 @@ export class EnemyVisual extends Sprite {
 
     this.texture = texture;
 
-    this.scale.set(0.60);
+    this.scale.set(0.56);
   }
 }

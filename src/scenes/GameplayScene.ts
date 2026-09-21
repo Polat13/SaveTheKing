@@ -1,61 +1,24 @@
 import {
+  Assets,
   Container,
-  Graphics,
+  Sprite,
 } from "pixi.js";
 
 import type { Scene } from "../app/SceneManager";
 
-import {
-  Player,
-} from "../entities/Player";
-
-import {
-  Enemy,
-} from "../entities/Enemy";
-
-import {
-  CombatSystem,
-} from "../systems/CombatSystem";
-
-import {
-  AnimationSystem,
-} from "../systems/AnimationSystem";
-
-import {
-  HitReactionSystem,
-} from "../systems/HitReactionSystem";
-
-import {
-  Button,
-} from "../ui/Button";
-
-import {
-  HealthBar,
-} from "../ui/HealthBar";
-
-import {
-  HitEffect,
-} from "../effects/HitEffect";
-
-import {
-  ScreenShake,
-} from "../effects/ScreenShake";
-
-import {
-  CombatAnimationController,
-} from "../controllers/CombatAnimationController";
-
-import {
-  Localization,
-} from "../localization/Localization";
-
-import {
-  CoinSystem,
-} from "../economy/CoinSystem";
-
-import {
-  UpgradeSystem,
-} from "../progression/UpgradeSystem";
+import { Player } from "../entities/Player";
+import { Enemy } from "../entities/Enemy";
+import { CombatSystem } from "../systems/CombatSystem";
+import { AnimationSystem } from "../systems/AnimationSystem";
+import { HitReactionSystem } from "../systems/HitReactionSystem";
+import { Button } from "../ui/Button";
+import { HealthBar } from "../ui/HealthBar";
+import { HitEffect } from "../effects/HitEffect";
+import { ScreenShake } from "../effects/ScreenShake";
+import { CombatAnimationController } from "../controllers/CombatAnimationController";
+import { Localization } from "../localization/Localization";
+import { CoinSystem } from "../economy/CoinSystem";
+import { UpgradeSystem } from "../progression/UpgradeSystem";
 
 export class GameplayScene
   extends Container
@@ -66,9 +29,7 @@ export class GameplayScene
   private readonly world: Container;
   private readonly ui: Container;
 
-  private readonly background: Graphics;
-  private readonly arena: Graphics;
-  private readonly arenaGlow: Graphics;
+  private readonly background: Sprite;
 
   private readonly player: Player;
   private readonly enemy: Enemy;
@@ -110,35 +71,14 @@ export class GameplayScene
 
     this.screenWidth = screenWidth;
     this.screenHeight = screenHeight;
-
     this.localization = localization;
-
     this.onWin = onWin;
     this.onLose = onLose;
-
-    // --------------------------------------------------
-    // Containers
-    // --------------------------------------------------
 
     this.world = new Container();
     this.ui = new Container();
 
-    // --------------------------------------------------
-    // Arena
-    // --------------------------------------------------
-
-    this.background =
-      new Graphics();
-
-    this.arenaGlow =
-      new Graphics();
-
-    this.arena =
-      new Graphics();
-
-    // --------------------------------------------------
-    // Systems
-    // --------------------------------------------------
+    this.background = new Sprite();
 
     this.animationSystem =
       new AnimationSystem();
@@ -152,8 +92,7 @@ export class GameplayScene
     this.player = new Player();
     this.enemy = new Enemy();
 
-    this.screenShake =
-      new ScreenShake();
+    this.screenShake = new ScreenShake();
 
     this.combatAnimationController =
       new CombatAnimationController(
@@ -162,16 +101,7 @@ export class GameplayScene
         this.enemy,
       );
 
-    // --------------------------------------------------
-    // Effects
-    // --------------------------------------------------
-
-    this.hitEffect =
-      new HitEffect();
-
-    // --------------------------------------------------
-    // UI
-    // --------------------------------------------------
+    this.hitEffect = new HitEffect();
 
     this.playerHealthBar =
       new HealthBar({
@@ -200,10 +130,6 @@ export class GameplayScene
         ),
         onClick: () => this.attack(),
       });
-
-    // --------------------------------------------------
-    // Combat
-    // --------------------------------------------------
 
     this.combatSystem =
       new CombatSystem(
@@ -276,22 +202,12 @@ export class GameplayScene
         },
       );
 
-    // --------------------------------------------------
-    // World hierarchy
-    // --------------------------------------------------
-
     this.world.addChild(
       this.background,
-      this.arenaGlow,
-      this.arena,
       this.player,
       this.enemy,
       this.hitEffect,
     );
-
-    // --------------------------------------------------
-    // UI hierarchy
-    // --------------------------------------------------
 
     this.ui.addChild(
       this.playerHealthBar,
@@ -299,14 +215,12 @@ export class GameplayScene
       this.attackButton,
     );
 
-    // --------------------------------------------------
-    // Scene hierarchy
-    // --------------------------------------------------
-
     this.addChild(
       this.world,
       this.ui,
     );
+
+    this.loadBackground();
 
     this.layout();
     this.updateTexts();
@@ -341,44 +255,32 @@ export class GameplayScene
 
   update(delta: number): void {
     this.combatSystem.update(delta);
-
     this.animationSystem.update(delta);
-
     this.hitReactionSystem.update(delta);
-
     this.hitEffect.update(delta);
-
     this.screenShake.update(delta);
 
     this.playerHealthBar.update(delta);
-
     this.enemyHealthBar.update(delta);
   }
 
   layout(): void {
-    const width =
-      this.screenWidth();
+    const width = this.screenWidth();
+    const height = this.screenHeight();
 
-    const height =
-      this.screenHeight();
-
-    this.layoutArena(
+    this.layoutBackground(
       width,
       height,
     );
 
-    // --------------------------------------------------
-    // World
-    // --------------------------------------------------
-
     this.player.position.set(
-      width * 0.28,
-      height * 0.52,
+      width * 0.25,
+      height * 0.62,
     );
 
     this.enemy.position.set(
       width * 0.72,
-      height * 0.52,
+      height * 0.65,
     );
 
     const scale = Math.min(
@@ -389,153 +291,96 @@ export class GameplayScene
     this.player.scale.set(scale);
     this.enemy.scale.set(scale);
 
-    // --------------------------------------------------
-    // UI
-    // --------------------------------------------------
-
     this.playerHealthBar.position.set(
       width * 0.28,
-      height * 0.20,
+      height * 0.42,
     );
 
     this.enemyHealthBar.position.set(
       width * 0.72,
-      height * 0.20,
+      height * 0.52,
     );
 
     this.attackButton.position.set(
       width / 2,
-      height * 0.82,
+      height * 0.85,
     );
   }
 
-  private layoutArena(
+  private async loadBackground(): Promise<void> {
+    try {
+      const texture = await Assets.load(
+        "/assets/backgrounds/bg.png",
+      );
+
+      this.background.texture =
+        texture;
+
+      this.layoutBackground(
+        this.screenWidth(),
+        this.screenHeight(),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to load battle background:",
+        error,
+      );
+    }
+  }
+
+  private layoutBackground(
     width: number,
     height: number,
   ): void {
-    // --------------------------------------------------
-    // Background
-    // --------------------------------------------------
+    if (!this.background.texture) {
+      return;
+    }
 
-    this.background.clear();
+    const textureWidth =
+      this.background.texture.width;
 
-    this.background.rect(
-      0,
-      0,
-      width,
-      height,
-    );
+    const textureHeight =
+      this.background.texture.height;
 
-    this.background.fill(
-      "#080d18",
-    );
+    if (
+      textureWidth <= 0 ||
+      textureHeight <= 0
+    ) {
+      return;
+    }
 
-    // --------------------------------------------------
-    // Upper atmosphere
-    // --------------------------------------------------
+    /*
+     * Cover:
+     * Görsel ekranı tamamen kaplar.
+     * En-boy oranı bozulmaz.
+     */
 
-    this.arenaGlow.clear();
+    const scaleX =
+      width / textureWidth;
 
-    this.arenaGlow.circle(
-      width / 2,
-      height * 0.45,
-      Math.min(
-        width,
-        height,
-      ) * 0.38,
-    );
+    const scaleY =
+      height / textureHeight;
 
-    this.arenaGlow.fill({
-      color: "#172554",
-      alpha: 0.35,
-    });
-
-    // --------------------------------------------------
-    // Arena floor
-    // --------------------------------------------------
-
-    const arenaWidth =
-      Math.min(
-        width * 0.92,
-        560,
+    const scale =
+      Math.max(
+        scaleX,
+        scaleY,
       );
 
-    const arenaHeight =
-      Math.min(
-        height * 0.42,
-        300,
-      );
-
-    const arenaX =
-      (width - arenaWidth) / 2;
-
-    const arenaY =
-      height * 0.40;
-
-    this.arena.clear();
-
-    // Main floor.
-    this.arena.roundRect(
-      arenaX,
-      arenaY,
-      arenaWidth,
-      arenaHeight,
-      28,
+    this.background.scale.set(
+      scale,
     );
 
-    this.arena.fill(
-      "#111827",
+    const scaledWidth =
+      textureWidth * scale;
+
+    const scaledHeight =
+      textureHeight * scale;
+
+    this.background.position.set(
+      (width - scaledWidth) / 2,
+      (height - scaledHeight) / 2,
     );
-
-    // Inner floor.
-    this.arena.roundRect(
-      arenaX + 8,
-      arenaY + 8,
-      arenaWidth - 16,
-      arenaHeight - 16,
-      22,
-    );
-
-    this.arena.fill(
-      "#172033",
-    );
-
-    // Center battle line.
-    this.arena.rect(
-      width / 2 - 1,
-      arenaY + 30,
-      2,
-      arenaHeight - 60,
-    );
-
-    this.arena.fill({
-      color: "#475569",
-      alpha: 0.35,
-    });
-
-    // Left platform.
-    this.arena.circle(
-      width * 0.28,
-      height * 0.64,
-      62,
-    );
-
-    this.arena.fill({
-      color: "#1e293b",
-      alpha: 0.9,
-    });
-
-    // Right platform.
-    this.arena.circle(
-      width * 0.72,
-      height * 0.64,
-      62,
-    );
-
-    this.arena.fill({
-      color: "#1e293b",
-      alpha: 0.9,
-    });
   }
 
   private attack(): void {
@@ -602,3 +447,4 @@ export class GameplayScene
     return this.enemy;
   }
 }
+
