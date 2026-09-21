@@ -65,7 +65,7 @@ export const translations = {
 
     upgrades: {
   title: "GELİŞTİRMELER",
-  coins: "COIN",
+  coins: "ALTIN",
   health: "KRAL CANI",
   attack: "KRAL VURUŞU",
   upgrade: "GELİŞTİR",

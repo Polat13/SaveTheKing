@@ -1,5 +1,6 @@
 import {
   Container,
+  Graphics,
 } from "pixi.js";
 
 import type { Scene } from "../app/SceneManager";
@@ -65,6 +66,10 @@ export class GameplayScene
   private readonly world: Container;
   private readonly ui: Container;
 
+  private readonly background: Graphics;
+  private readonly arena: Graphics;
+  private readonly arenaGlow: Graphics;
+
   private readonly player: Player;
   private readonly enemy: Enemy;
 
@@ -117,6 +122,19 @@ export class GameplayScene
 
     this.world = new Container();
     this.ui = new Container();
+
+    // --------------------------------------------------
+    // Arena
+    // --------------------------------------------------
+
+    this.background =
+      new Graphics();
+
+    this.arenaGlow =
+      new Graphics();
+
+    this.arena =
+      new Graphics();
 
     // --------------------------------------------------
     // Systems
@@ -199,6 +217,7 @@ export class GameplayScene
 
           onPlayerHit: () => {
             this.coinSystem.add(10);
+
             this.updateHealthBars();
 
             this.hitReactionSystem.play(
@@ -262,6 +281,9 @@ export class GameplayScene
     // --------------------------------------------------
 
     this.world.addChild(
+      this.background,
+      this.arenaGlow,
+      this.arena,
       this.player,
       this.enemy,
       this.hitEffect,
@@ -297,9 +319,10 @@ export class GameplayScene
     this.hitReactionSystem.clear();
     this.screenShake.clear();
 
-    
     this.applyPlayerStats();
+
     this.combatSystem.reset();
+
     this.updateHealthBars();
     this.updateTexts();
 
@@ -338,6 +361,11 @@ export class GameplayScene
 
     const height =
       this.screenHeight();
+
+    this.layoutArena(
+      width,
+      height,
+    );
 
     // --------------------------------------------------
     // World
@@ -379,6 +407,135 @@ export class GameplayScene
       width / 2,
       height * 0.82,
     );
+  }
+
+  private layoutArena(
+    width: number,
+    height: number,
+  ): void {
+    // --------------------------------------------------
+    // Background
+    // --------------------------------------------------
+
+    this.background.clear();
+
+    this.background.rect(
+      0,
+      0,
+      width,
+      height,
+    );
+
+    this.background.fill(
+      "#080d18",
+    );
+
+    // --------------------------------------------------
+    // Upper atmosphere
+    // --------------------------------------------------
+
+    this.arenaGlow.clear();
+
+    this.arenaGlow.circle(
+      width / 2,
+      height * 0.45,
+      Math.min(
+        width,
+        height,
+      ) * 0.38,
+    );
+
+    this.arenaGlow.fill({
+      color: "#172554",
+      alpha: 0.35,
+    });
+
+    // --------------------------------------------------
+    // Arena floor
+    // --------------------------------------------------
+
+    const arenaWidth =
+      Math.min(
+        width * 0.92,
+        560,
+      );
+
+    const arenaHeight =
+      Math.min(
+        height * 0.42,
+        300,
+      );
+
+    const arenaX =
+      (width - arenaWidth) / 2;
+
+    const arenaY =
+      height * 0.40;
+
+    this.arena.clear();
+
+    // Main floor.
+    this.arena.roundRect(
+      arenaX,
+      arenaY,
+      arenaWidth,
+      arenaHeight,
+      28,
+    );
+
+    this.arena.fill(
+      "#111827",
+    );
+
+    // Inner floor.
+    this.arena.roundRect(
+      arenaX + 8,
+      arenaY + 8,
+      arenaWidth - 16,
+      arenaHeight - 16,
+      22,
+    );
+
+    this.arena.fill(
+      "#172033",
+    );
+
+    // Center battle line.
+    this.arena.rect(
+      width / 2 - 1,
+      arenaY + 30,
+      2,
+      arenaHeight - 60,
+    );
+
+    this.arena.fill({
+      color: "#475569",
+      alpha: 0.35,
+    });
+
+    // Left platform.
+    this.arena.circle(
+      width * 0.28,
+      height * 0.64,
+      62,
+    );
+
+    this.arena.fill({
+      color: "#1e293b",
+      alpha: 0.9,
+    });
+
+    // Right platform.
+    this.arena.circle(
+      width * 0.72,
+      height * 0.64,
+      62,
+    );
+
+    this.arena.fill({
+      color: "#1e293b",
+      alpha: 0.9,
+    });
   }
 
   private attack(): void {
@@ -429,14 +586,13 @@ export class GameplayScene
   }
 
   private applyPlayerStats(): void {
-  this.player.applyStats(
-    this.upgradeSystem.getHealth(),
-    this.upgradeSystem.getAttackDamage(),
-  );
+    this.player.applyStats(
+      this.upgradeSystem.getHealth(),
+      this.upgradeSystem.getAttackDamage(),
+    );
 
-  this.updateHealthBars();
-}
-
+    this.updateHealthBars();
+  }
 
   getPlayer(): Player {
     return this.player;
