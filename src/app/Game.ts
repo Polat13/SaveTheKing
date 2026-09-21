@@ -17,8 +17,20 @@ import {
 } from "../scenes/EndScene";
 
 import {
+  UpgradeScene,
+} from "../scenes/UpgradeScene";
+
+import {
   Localization,
 } from "../localization/Localization";
+
+import {
+  CoinSystem,
+} from "../economy/CoinSystem";
+
+import {
+  UpgradeSystem,
+} from "../progression/UpgradeSystem";
 
 export class Game {
   private readonly app: Application;
@@ -27,9 +39,13 @@ export class Game {
 
   private readonly localization: Localization;
 
+  private readonly coinSystem: CoinSystem;
+  private readonly upgradeSystem: UpgradeSystem;
+
   private readonly startScene: StartScene;
   private readonly gameplayScene: GameplayScene;
   private readonly endScene: EndScene;
+  private readonly upgradeScene: UpgradeScene;
 
   constructor(app: Application) {
     this.app = app;
@@ -40,6 +56,14 @@ export class Game {
     this.localization =
       new Localization();
 
+    this.coinSystem =
+      new CoinSystem();
+
+    this.upgradeSystem =
+      new UpgradeSystem(
+        this.coinSystem,
+      );
+
     this.startScene =
       new StartScene(
         () => this.app.screen.width,
@@ -49,32 +73,46 @@ export class Game {
       );
 
     this.gameplayScene =
-  new GameplayScene(
-    () => this.app.screen.width,
-    () => this.app.screen.height,
-    this.localization,
-    () => this.showEndScene(true),
-    () => this.showEndScene(false),
-  );
+      new GameplayScene(
+        () => this.app.screen.width,
+        () => this.app.screen.height,
+        this.localization,
+        this.coinSystem,
+        this.upgradeSystem,
+        () => this.showEndScene(true),
+        () => this.showEndScene(false),
+      );
 
     this.endScene =
-    new EndScene(
-    () => this.app.screen.width,
-    () => this.app.screen.height,
-    this.localization,
-    () => this.startGameplay(),
-  );
+      new EndScene(
+        () => this.app.screen.width,
+        () => this.app.screen.height,
+        this.localization,
+        () => this.showUpgradeScene(),
+      );
+
+    this.upgradeScene =
+      new UpgradeScene(
+        () => this.app.screen.width,
+        () => this.app.screen.height,
+        this.coinSystem,
+        this.upgradeSystem,
+        this.localization,
+        () => this.startGameplay(),
+      );
 
     this.app.stage.addChild(
       this.startScene,
       this.gameplayScene,
       this.endScene,
+      this.upgradeScene,
     );
 
     // Only the start screen
     // should be visible at startup.
     this.gameplayScene.visible = false;
     this.endScene.visible = false;
+    this.upgradeScene.visible = false;
 
     this.app.ticker.add(
       (ticker) => {
@@ -90,6 +128,7 @@ export class Game {
         this.startScene.layout();
         this.gameplayScene.layout();
         this.endScene.layout();
+        this.upgradeScene.layout();
       },
     );
   }
@@ -113,6 +152,12 @@ export class Game {
 
     this.sceneManager.changeScene(
       this.endScene,
+    );
+  }
+
+  private showUpgradeScene(): void {
+    this.sceneManager.changeScene(
+      this.upgradeScene,
     );
   }
 }

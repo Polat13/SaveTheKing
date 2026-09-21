@@ -48,6 +48,14 @@ import {
   Localization,
 } from "../localization/Localization";
 
+import {
+  CoinSystem,
+} from "../economy/CoinSystem";
+
+import {
+  UpgradeSystem,
+} from "../progression/UpgradeSystem";
+
 export class GameplayScene
   extends Container
   implements Scene
@@ -63,6 +71,8 @@ export class GameplayScene
   private readonly combatSystem: CombatSystem;
   private readonly animationSystem: AnimationSystem;
   private readonly hitReactionSystem: HitReactionSystem;
+  private readonly coinSystem: CoinSystem;
+  private readonly upgradeSystem: UpgradeSystem;
   private readonly screenShake: ScreenShake;
 
   private readonly combatAnimationController:
@@ -86,6 +96,8 @@ export class GameplayScene
     screenWidth: () => number,
     screenHeight: () => number,
     localization: Localization,
+    coinSystem: CoinSystem,
+    upgradeSystem: UpgradeSystem,
     onWin: () => void,
     onLose: () => void,
   ) {
@@ -107,13 +119,6 @@ export class GameplayScene
     this.ui = new Container();
 
     // --------------------------------------------------
-    // Entities
-    // --------------------------------------------------
-
-    this.player = new Player();
-    this.enemy = new Enemy();
-
-    // --------------------------------------------------
     // Systems
     // --------------------------------------------------
 
@@ -122,6 +127,12 @@ export class GameplayScene
 
     this.hitReactionSystem =
       new HitReactionSystem();
+
+    this.coinSystem = coinSystem;
+    this.upgradeSystem = upgradeSystem;
+
+    this.player = new Player();
+    this.enemy = new Enemy();
 
     this.screenShake =
       new ScreenShake();
@@ -187,6 +198,7 @@ export class GameplayScene
           },
 
           onPlayerHit: () => {
+            this.coinSystem.add(10);
             this.updateHealthBars();
 
             this.hitReactionSystem.play(
@@ -285,8 +297,9 @@ export class GameplayScene
     this.hitReactionSystem.clear();
     this.screenShake.clear();
 
+    
+    this.applyPlayerStats();
     this.combatSystem.reset();
-
     this.updateHealthBars();
     this.updateTexts();
 
@@ -414,6 +427,16 @@ export class GameplayScene
       ),
     );
   }
+
+  private applyPlayerStats(): void {
+  this.player.applyStats(
+    this.upgradeSystem.getHealth(),
+    this.upgradeSystem.getAttackDamage(),
+  );
+
+  this.updateHealthBars();
+}
+
 
   getPlayer(): Player {
     return this.player;

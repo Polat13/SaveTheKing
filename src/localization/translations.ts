@@ -17,21 +17,24 @@ export const translations = {
     },
 
     end: {
-      winTitle: "YOU WIN!",
-      winSubtitle:
-        "The king has been saved!",
-      loseTitle: "YOU LOSE!",
-      loseSubtitle:
-        "The king has been defeated.",
-      playAgain: "PLAY AGAIN",
-    },
+  winTitle: "YOU WIN!",
+  winSubtitle:
+    "The king has been saved!",
+  loseTitle: "YOU LOSE!",
+  loseSubtitle:
+    "The king has been defeated.",
+  playAgain: "PLAY AGAIN",
+  upgrade: "UPGRADES",
+},
 
     upgrades: {
-      title: "UPGRADES",
-      health: "KING HEALTH",
-      attack: "KING ATTACK",
-      upgrade: "UPGRADE",
-    },
+  title: "UPGRADES",
+  coins: "COINS",
+  health: "KING HEALTH",
+  attack: "KING ATTACK",
+  upgrade: "UPGRADE",
+  continue: "CONTINUE",
+},
   },
 
   tr: {
@@ -50,20 +53,23 @@ export const translations = {
     },
 
     end: {
-      winTitle: "KAZANDIN!",
-      winSubtitle:
-        "Kral kurtarıldı!",
-      loseTitle: "KAYBETTİN!",
-      loseSubtitle:
-        "Kral yenildi.",
-      playAgain: "TEKRAR OYNA",
-    },
+  winTitle: "KAZANDIN!",
+  winSubtitle:
+    "Kral kurtarıldı!",
+  loseTitle: "KAYBETTİN!",
+  loseSubtitle:
+    "Kral yenildi.",
+  playAgain: "TEKRAR OYNA",
+  upgrade: "GELİŞTİRMELER",
+},
 
     upgrades: {
-      title: "GELİŞTİRMELER",
-      health: "KRAL CANI",
-      attack: "KRAL VURUŞU",
-      upgrade: "GELİŞTİR",
-    },
+  title: "GELİŞTİRMELER",
+  coins: "COIN",
+  health: "KRAL CANI",
+  attack: "KRAL VURUŞU",
+  upgrade: "GELİŞTİR",
+  continue: "DEVAM ET",
+},
   },
 } as const;
