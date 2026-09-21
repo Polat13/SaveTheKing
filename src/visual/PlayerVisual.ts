@@ -19,6 +19,6 @@ export class PlayerVisual extends Sprite {
 
     this.texture = texture;
 
-    this.scale.set(0.70);
+    this.scale.set(0.65);
   }
 }
