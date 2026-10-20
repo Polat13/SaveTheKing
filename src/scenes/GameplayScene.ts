@@ -1,60 +1,24 @@
 import {
+  Assets,
   Container,
+  Sprite,
 } from "pixi.js";
 
 import type { Scene } from "../app/SceneManager";
 
-import {
-  Player,
-} from "../entities/Player";
-
-import {
-  Enemy,
-} from "../entities/Enemy";
-
-import {
-  CombatSystem,
-} from "../systems/CombatSystem";
-
-import {
-  AnimationSystem,
-} from "../systems/AnimationSystem";
-
-import {
-  HitReactionSystem,
-} from "../systems/HitReactionSystem";
-
-import {
-  Button,
-} from "../ui/Button";
-
-import {
-  HealthBar,
-} from "../ui/HealthBar";
-
-import {
-  HitEffect,
-} from "../effects/HitEffect";
-
-import {
-  ScreenShake,
-} from "../effects/ScreenShake";
-
-import {
-  CombatAnimationController,
-} from "../controllers/CombatAnimationController";
-
-import {
-  Localization,
-} from "../localization/Localization";
-
-import {
-  CoinSystem,
-} from "../economy/CoinSystem";
-
-import {
-  UpgradeSystem,
-} from "../progression/UpgradeSystem";
+import { Player } from "../entities/Player";
+import { Enemy } from "../entities/Enemy";
+import { CombatSystem } from "../systems/CombatSystem";
+import { AnimationSystem } from "../systems/AnimationSystem";
+import { HitReactionSystem } from "../systems/HitReactionSystem";
+import { Button } from "../ui/Button";
+import { HealthBar } from "../ui/HealthBar";
+import { HitEffect } from "../effects/HitEffect";
+import { ScreenShake } from "../effects/ScreenShake";
+import { CombatAnimationController } from "../controllers/CombatAnimationController";
+import { Localization } from "../localization/Localization";
+import { CoinSystem } from "../economy/CoinSystem";
+import { UpgradeSystem } from "../progression/UpgradeSystem";
 
 export class GameplayScene
   extends Container
@@ -64,6 +28,8 @@ export class GameplayScene
 
   private readonly world: Container;
   private readonly ui: Container;
+
+  private readonly background: Sprite;
 
   private readonly player: Player;
   private readonly enemy: Enemy;
@@ -105,22 +71,14 @@ export class GameplayScene
 
     this.screenWidth = screenWidth;
     this.screenHeight = screenHeight;
-
     this.localization = localization;
-
     this.onWin = onWin;
     this.onLose = onLose;
-
-    // --------------------------------------------------
-    // Containers
-    // --------------------------------------------------
 
     this.world = new Container();
     this.ui = new Container();
 
-    // --------------------------------------------------
-    // Systems
-    // --------------------------------------------------
+    this.background = new Sprite();
 
     this.animationSystem =
       new AnimationSystem();
@@ -134,8 +92,7 @@ export class GameplayScene
     this.player = new Player();
     this.enemy = new Enemy();
 
-    this.screenShake =
-      new ScreenShake();
+    this.screenShake = new ScreenShake();
 
     this.combatAnimationController =
       new CombatAnimationController(
@@ -144,16 +101,7 @@ export class GameplayScene
         this.enemy,
       );
 
-    // --------------------------------------------------
-    // Effects
-    // --------------------------------------------------
-
-    this.hitEffect =
-      new HitEffect();
-
-    // --------------------------------------------------
-    // UI
-    // --------------------------------------------------
+    this.hitEffect = new HitEffect();
 
     this.playerHealthBar =
       new HealthBar({
@@ -183,10 +131,6 @@ export class GameplayScene
         onClick: () => this.attack(),
       });
 
-    // --------------------------------------------------
-    // Combat
-    // --------------------------------------------------
-
     this.combatSystem =
       new CombatSystem(
         this.player,
@@ -199,6 +143,7 @@ export class GameplayScene
 
           onPlayerHit: () => {
             this.coinSystem.add(10);
+
             this.updateHealthBars();
 
             this.hitReactionSystem.play(
@@ -257,19 +202,12 @@ export class GameplayScene
         },
       );
 
-    // --------------------------------------------------
-    // World hierarchy
-    // --------------------------------------------------
-
     this.world.addChild(
+      this.background,
       this.player,
       this.enemy,
       this.hitEffect,
     );
-
-    // --------------------------------------------------
-    // UI hierarchy
-    // --------------------------------------------------
 
     this.ui.addChild(
       this.playerHealthBar,
@@ -277,14 +215,12 @@ export class GameplayScene
       this.attackButton,
     );
 
-    // --------------------------------------------------
-    // Scene hierarchy
-    // --------------------------------------------------
-
     this.addChild(
       this.world,
       this.ui,
     );
+
+    this.loadBackground();
 
     this.layout();
     this.updateTexts();
@@ -297,9 +233,10 @@ export class GameplayScene
     this.hitReactionSystem.clear();
     this.screenShake.clear();
 
-    
     this.applyPlayerStats();
+
     this.combatSystem.reset();
+
     this.updateHealthBars();
     this.updateTexts();
 
@@ -318,39 +255,32 @@ export class GameplayScene
 
   update(delta: number): void {
     this.combatSystem.update(delta);
-
     this.animationSystem.update(delta);
-
     this.hitReactionSystem.update(delta);
-
     this.hitEffect.update(delta);
-
     this.screenShake.update(delta);
 
     this.playerHealthBar.update(delta);
-
     this.enemyHealthBar.update(delta);
   }
 
   layout(): void {
-    const width =
-      this.screenWidth();
+    const width = this.screenWidth();
+    const height = this.screenHeight();
 
-    const height =
-      this.screenHeight();
-
-    // --------------------------------------------------
-    // World
-    // --------------------------------------------------
+    this.layoutBackground(
+      width,
+      height,
+    );
 
     this.player.position.set(
-      width * 0.28,
-      height * 0.52,
+      width * 0.25,
+      height * 0.62,
     );
 
     this.enemy.position.set(
       width * 0.72,
-      height * 0.52,
+      height * 0.65,
     );
 
     const scale = Math.min(
@@ -361,23 +291,95 @@ export class GameplayScene
     this.player.scale.set(scale);
     this.enemy.scale.set(scale);
 
-    // --------------------------------------------------
-    // UI
-    // --------------------------------------------------
-
     this.playerHealthBar.position.set(
       width * 0.28,
-      height * 0.20,
+      height * 0.42,
     );
 
     this.enemyHealthBar.position.set(
       width * 0.72,
-      height * 0.20,
+      height * 0.52,
     );
 
     this.attackButton.position.set(
       width / 2,
-      height * 0.82,
+      height * 0.85,
+    );
+  }
+
+  private async loadBackground(): Promise<void> {
+    try {
+      const texture = await Assets.load(
+        "/assets/backgrounds/bg.png",
+      );
+
+      this.background.texture =
+        texture;
+
+      this.layoutBackground(
+        this.screenWidth(),
+        this.screenHeight(),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to load battle background:",
+        error,
+      );
+    }
+  }
+
+  private layoutBackground(
+    width: number,
+    height: number,
+  ): void {
+    if (!this.background.texture) {
+      return;
+    }
+
+    const textureWidth =
+      this.background.texture.width;
+
+    const textureHeight =
+      this.background.texture.height;
+
+    if (
+      textureWidth <= 0 ||
+      textureHeight <= 0
+    ) {
+      return;
+    }
+
+    /*
+     * Cover:
+     * Görsel ekranı tamamen kaplar.
+     * En-boy oranı bozulmaz.
+     */
+
+    const scaleX =
+      width / textureWidth;
+
+    const scaleY =
+      height / textureHeight;
+
+    const scale =
+      Math.max(
+        scaleX,
+        scaleY,
+      );
+
+    this.background.scale.set(
+      scale,
+    );
+
+    const scaledWidth =
+      textureWidth * scale;
+
+    const scaledHeight =
+      textureHeight * scale;
+
+    this.background.position.set(
+      (width - scaledWidth) / 2,
+      (height - scaledHeight) / 2,
     );
   }
 
@@ -429,14 +431,13 @@ export class GameplayScene
   }
 
   private applyPlayerStats(): void {
-  this.player.applyStats(
-    this.upgradeSystem.getHealth(),
-    this.upgradeSystem.getAttackDamage(),
-  );
+    this.player.applyStats(
+      this.upgradeSystem.getHealth(),
+      this.upgradeSystem.getAttackDamage(),
+    );
 
-  this.updateHealthBars();
-}
-
+    this.updateHealthBars();
+  }
 
   getPlayer(): Player {
     return this.player;
@@ -446,3 +447,4 @@ export class GameplayScene
     return this.enemy;
   }
 }
+
