@@ -1,6 +1,7 @@
 import {
   Container,
   Graphics,
+  Ticker,
   Text,
   TextStyle,
 } from "pixi.js";
@@ -15,6 +16,20 @@ interface ButtonOptions {
 export class Button extends Container {
   private readonly background: Graphics;
   private readonly labelText: Text;
+
+  private targetScale = 1;
+  private enabled = true;
+
+  private readonly tick = (ticker: Ticker): void => {
+    // Smoothly ease toward the target scale (hover / press feedback).
+    const current = this.scale.x;
+    const next =
+      current +
+      (this.targetScale - current) *
+        Math.min(1, 0.3 * ticker.deltaTime);
+
+    this.scale.set(next);
+  };
 
   constructor(options: ButtonOptions) {
     super();
@@ -52,28 +67,47 @@ export class Button extends Container {
     this.eventMode = "static";
     this.cursor = "pointer";
 
+    this.on("pointerover", () => {
+      this.targetScale = 1.06;
+    });
+
+    this.on("pointerout", () => {
+      this.targetScale = 1;
+    });
+
     this.on(
       "pointerdown",
       () => {
-        this.scale.set(0.94);
+        this.targetScale = 0.92;
       },
     );
 
     this.on(
       "pointerup",
       () => {
-        this.scale.set(1);
+        this.targetScale = 1.06;
 
-        options.onClick();
+        if (this.enabled) {
+          options.onClick();
+        }
       },
     );
 
     this.on(
       "pointerupoutside",
       () => {
-        this.scale.set(1);
+        this.targetScale = 1;
       },
     );
+
+    Ticker.shared.add(this.tick);
+  }
+
+  override destroy(
+    ...args: Parameters<Container["destroy"]>
+  ): void {
+    Ticker.shared.remove(this.tick);
+    super.destroy(...args);
   }
 
   setLabel(label: string): void {
@@ -81,6 +115,9 @@ export class Button extends Container {
   }
 
   setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+    this.targetScale = 1;
+
     this.eventMode = enabled
       ? "static"
       : "none";

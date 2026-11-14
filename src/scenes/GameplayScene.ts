@@ -2,6 +2,8 @@ import {
   Assets,
   Container,
   Sprite,
+  Text,
+  TextStyle,
 } from "pixi.js";
 
 import type { Scene } from "../app/SceneManager";
@@ -19,6 +21,10 @@ import { CombatAnimationController } from "../controllers/CombatAnimationControl
 import { Localization } from "../localization/Localization";
 import { CoinSystem } from "../economy/CoinSystem";
 import { UpgradeSystem } from "../progression/UpgradeSystem";
+import { assetPath } from "../storage/SaveStorage";
+import { LevelSystem } from "../progression/LevelSystem";
+import { FloatingText } from "../effects/FloatingText";
+import { LevelBanner } from "../ui/LevelBanner";
 
 export class GameplayScene
   extends Container
@@ -50,6 +56,10 @@ export class GameplayScene
   private readonly enemyHealthBar: HealthBar;
 
   private readonly hitEffect: HitEffect;
+  private readonly floatingText: FloatingText;
+  private readonly levelBanner: LevelBanner;
+  private readonly levelSystem: LevelSystem;
+  private readonly hudText: Text;
 
   private readonly onWin: () => void;
   private readonly onLose: () => void;
@@ -64,6 +74,7 @@ export class GameplayScene
     localization: Localization,
     coinSystem: CoinSystem,
     upgradeSystem: UpgradeSystem,
+    levelSystem: LevelSystem,
     onWin: () => void,
     onLose: () => void,
   ) {
@@ -88,6 +99,23 @@ export class GameplayScene
 
     this.coinSystem = coinSystem;
     this.upgradeSystem = upgradeSystem;
+    this.levelSystem = levelSystem;
+
+    this.floatingText = new FloatingText();
+    this.levelBanner = new LevelBanner();
+
+    this.hudText = new Text({
+      text: "",
+      style: new TextStyle({
+        fontFamily: "Arial",
+        fontSize: 20,
+        fontWeight: "900",
+        fill: "#ffffff",
+        stroke: { color: "#111827", width: 4 },
+      }),
+    });
+
+    this.hudText.anchor.set(0.5, 0);
 
     this.player = new Player();
     this.enemy = new Enemy();
@@ -144,6 +172,20 @@ export class GameplayScene
           onPlayerHit: () => {
             this.coinSystem.add(10);
 
+            this.floatingText.spawn(
+              `-${this.player.attackDamage}`,
+              this.enemy.x,
+              this.enemy.y - 90,
+              "#ffffff",
+            );
+
+            this.floatingText.spawn(
+              "+10",
+              this.enemy.x + 50,
+              this.enemy.y - 130,
+              "#facc15",
+            );
+
             this.updateHealthBars();
 
             this.hitReactionSystem.play(
@@ -167,6 +209,13 @@ export class GameplayScene
           },
 
           onEnemyHit: () => {
+            this.floatingText.spawn(
+              `-${this.enemy.attackDamage}`,
+              this.player.x,
+              this.player.y - 90,
+              "#f87171",
+            );
+
             this.updateHealthBars();
 
             this.hitReactionSystem.play(
@@ -189,6 +238,12 @@ export class GameplayScene
               false,
             );
 
+            this.coinSystem.add(
+              this.levelSystem.getCurrent().reward,
+            );
+
+            this.levelSystem.completeLevel();
+
             this.onWin();
           },
 
@@ -207,12 +262,15 @@ export class GameplayScene
       this.player,
       this.enemy,
       this.hitEffect,
+      this.floatingText,
     );
 
     this.ui.addChild(
       this.playerHealthBar,
       this.enemyHealthBar,
       this.attackButton,
+      this.hudText,
+      this.levelBanner,
     );
 
     this.addChild(
@@ -233,7 +291,10 @@ export class GameplayScene
     this.hitReactionSystem.clear();
     this.screenShake.clear();
 
+    this.floatingText.clear();
+
     this.applyPlayerStats();
+    this.applyLevel();
 
     this.combatSystem.reset();
 
@@ -248,6 +309,9 @@ export class GameplayScene
   exit(): void {
     this.visible = false;
 
+    this.levelBanner.clear();
+    this.floatingText.clear();
+
     this.animationSystem.clear();
     this.hitReactionSystem.clear();
     this.screenShake.clear();
@@ -258,6 +322,10 @@ export class GameplayScene
     this.animationSystem.update(delta);
     this.hitReactionSystem.update(delta);
     this.hitEffect.update(delta);
+    this.floatingText.update(delta);
+    this.levelBanner.update(delta);
+    this.player.updateIdle(delta);
+    this.enemy.updateIdle(delta);
     this.screenShake.update(delta);
 
     this.playerHealthBar.update(delta);
@@ -305,12 +373,15 @@ export class GameplayScene
       width / 2,
       height * 0.85,
     );
+
+    this.hudText.position.set(width / 2, 16);
+    this.levelBanner.position.set(width / 2, height * 0.22);
   }
 
   private async loadBackground(): Promise<void> {
     try {
       const texture = await Assets.load(
-        "/assets/backgrounds/bg.png",
+        assetPath("assets/backgrounds/bg.png"),
       );
 
       this.background.texture =
@@ -418,15 +489,43 @@ export class GameplayScene
     );
 
     this.enemyHealthBar.setLabel(
-      this.localization.get(
-        "gameplay.enemy",
-      ),
+      this.localization
+        .get(this.levelSystem.getCurrent().nameKey)
+        .toUpperCase(),
     );
 
     this.attackButton.setLabel(
       this.localization.get(
         "gameplay.attack",
       ),
+    );
+  }
+
+  private applyLevel(): void {
+    const level = this.levelSystem.getCurrent();
+    const levelNumber = this.levelSystem.getLevel();
+
+    this.enemy.configure(
+      level.kind,
+      level.enemyHp,
+      level.enemyDamage,
+      level.tint,
+      level.size,
+    );
+
+    const levelLabel = `${this.localization.get("gameplay.level")} ${levelNumber}`;
+    const enemyName = this.localization.get(level.nameKey);
+
+    this.enemyHealthBar.setLabel(enemyName.toUpperCase());
+
+    this.hudText.text = `${levelLabel}  •  ${enemyName}`;
+
+    this.levelBanner.show(
+      level.isBoss
+        ? this.localization.get("gameplay.boss")
+        : levelLabel,
+      enemyName,
+      level.isBoss ? "#f87171" : "#facc15",
     );
   }
 

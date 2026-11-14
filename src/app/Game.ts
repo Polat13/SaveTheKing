@@ -32,6 +32,10 @@ import {
   UpgradeSystem,
 } from "../progression/UpgradeSystem";
 
+import {
+  LevelSystem,
+} from "../progression/LevelSystem";
+
 export class Game {
   private readonly app: Application;
 
@@ -41,6 +45,7 @@ export class Game {
 
   private readonly coinSystem: CoinSystem;
   private readonly upgradeSystem: UpgradeSystem;
+  private readonly levelSystem: LevelSystem;
 
   private readonly startScene: StartScene;
   private readonly gameplayScene: GameplayScene;
@@ -64,6 +69,9 @@ export class Game {
         this.coinSystem,
       );
 
+    this.levelSystem =
+      new LevelSystem();
+
     this.startScene =
       new StartScene(
         () => this.app.screen.width,
@@ -79,6 +87,7 @@ export class Game {
         this.localization,
         this.coinSystem,
         this.upgradeSystem,
+        this.levelSystem,
         () => this.showEndScene(true),
         () => this.showEndScene(false),
       );

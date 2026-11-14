@@ -14,6 +14,19 @@ export const translations = {
       attack: "ATTACK",
       king: "KING",
       enemy: "ENEMY",
+      level: "LEVEL",
+      boss: "BOSS FIGHT!",
+    },
+
+    enemies: {
+      scout: "Goblin Scout",
+      warrior: "Goblin Warrior",
+      brute: "Goblin Brute",
+      shadow: "Shadow Goblin",
+      king: "Goblin King",
+      slime: "Toxic Slime",
+      bat: "Fire Bat",
+      golem: "Stone Golem",
     },
 
     end: {
@@ -50,6 +63,19 @@ export const translations = {
       attack: "SALDIR",
       king: "KRAL",
       enemy: "DÜŞMAN",
+      level: "BÖLÜM",
+      boss: "BOSS SAVAŞI!",
+    },
+
+    enemies: {
+      scout: "Goblin Gözcü",
+      warrior: "Goblin Savaşçı",
+      brute: "Goblin Zorba",
+      shadow: "Gölge Goblin",
+      king: "Goblin Kral",
+      slime: "Zehirli Balçık",
+      bat: "Ateş Yarasası",
+      golem: "Taş Golem",
     },
 
     end: {

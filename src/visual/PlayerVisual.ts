@@ -3,6 +3,8 @@ import {
   Sprite,
 } from "pixi.js";
 
+import { assetPath } from "../storage/SaveStorage";
+
 export class PlayerVisual extends Sprite {
   constructor() {
     super();
@@ -13,12 +15,21 @@ export class PlayerVisual extends Sprite {
   }
 
   private async load(): Promise<void> {
-    const texture = await Assets.load(
-      "/assets/characters/player1.png",
-    );
+    try {
+      const texture = await Assets.load(
+        assetPath(
+          "assets/characters/player1.png",
+        ),
+      );
 
-    this.texture = texture;
+      this.texture = texture;
 
-    this.scale.set(0.65);
+      this.scale.set(0.65);
+    } catch (error) {
+      console.error(
+        "Failed to load player visual:",
+        error,
+      );
+    }
   }
 }

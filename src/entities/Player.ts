@@ -12,17 +12,20 @@ export class Player extends Container {
 
   attackDamage = 1;
 
+  /** Inner container for idle animation, so combat tweens on `this` stay untouched. */
+  private readonly body: Container;
   private readonly visual: PlayerVisual;
+
+  private idleTime = 0;
 
   constructor() {
     super();
 
-    this.visual =
-      new PlayerVisual();
+    this.body = new Container();
+    this.visual = new PlayerVisual();
 
-    this.addChild(
-      this.visual,
-    );
+    this.body.addChild(this.visual);
+    this.addChild(this.body);
   }
 
   applyStats(
@@ -33,6 +36,12 @@ export class Player extends Container {
     this.attackDamage = attackDamage;
 
     this.hp = this.maxHp;
+  }
+
+  updateIdle(delta: number): void {
+    this.idleTime += (delta / 60) * 2.5;
+
+    this.body.y = Math.sin(this.idleTime) * 4;
   }
 
   takeDamage(amount: number): void {
