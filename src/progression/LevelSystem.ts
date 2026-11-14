@@ -21,12 +21,21 @@ export interface LevelDefinition {
  * Hand-designed chapter of five fights.
  * After the boss the chapter repeats with
  * scaled-up stats so the game never ends.
+ *
+ * Balance notes (king starts with 5 HP / 1 attack,
+ * the king always strikes first, +10 coins per hit,
+ * first upgrade costs 30):
+ *  1 Scout   - 3 hits to win, king takes 2 dmg  -> easy tutorial win, ~50 coins
+ *  2 Warrior - winnable even without upgrades (4 dmg taken), easy with one
+ *  3 Brute   - needs about 2-3 upgrades, first real check
+ *  4 Shadow  - needs balanced health + attack upgrades
+ *  5 King    - boss, needs a few more upgrades / possibly a retry
  */
 const CHAPTER: readonly Omit<LevelDefinition, "isBoss">[] = [
-  { nameKey: "enemies.scout", enemyHp: 5, enemyDamage: 1, reward: 20, tint: 0xffffff, size: 1.0 },
-  { nameKey: "enemies.warrior", enemyHp: 7, enemyDamage: 1, reward: 30, tint: 0xb9f5a8, size: 1.05 },
-  { nameKey: "enemies.brute", enemyHp: 10, enemyDamage: 2, reward: 45, tint: 0xffb36b, size: 1.15 },
-  { nameKey: "enemies.shadow", enemyHp: 13, enemyDamage: 2, reward: 60, tint: 0xa797ff, size: 1.08 },
+  { nameKey: "enemies.scout", enemyHp: 3, enemyDamage: 1, reward: 20, tint: 0xffffff, size: 1.0 },
+  { nameKey: "enemies.warrior", enemyHp: 5, enemyDamage: 1, reward: 30, tint: 0xb9f5a8, size: 1.05 },
+  { nameKey: "enemies.brute", enemyHp: 8, enemyDamage: 2, reward: 45, tint: 0xffb36b, size: 1.15 },
+  { nameKey: "enemies.shadow", enemyHp: 12, enemyDamage: 2, reward: 60, tint: 0xa797ff, size: 1.08 },
   { nameKey: "enemies.king", enemyHp: 18, enemyDamage: 3, reward: 100, tint: 0xff6a6a, size: 1.3 },
 ];
 

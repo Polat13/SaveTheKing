@@ -22,7 +22,7 @@ export class UpgradeSystem {
   private attackLevel =
     loadNumber(ATTACK_LEVEL_KEY);
 
-  private readonly baseHealth = 3;
+  private readonly baseHealth = 5;
   private readonly baseAttack = 1;
 
   private readonly healthIncrease = 1;
