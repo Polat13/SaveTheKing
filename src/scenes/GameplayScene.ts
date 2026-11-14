@@ -506,6 +506,7 @@ export class GameplayScene
     const levelNumber = this.levelSystem.getLevel();
 
     this.enemy.configure(
+      level.kind,
       level.enemyHp,
       level.enemyDamage,
       level.tint,

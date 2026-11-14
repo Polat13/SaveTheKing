@@ -4,8 +4,16 @@ import {
 
 import {
   EnemyVisual,
-  type EnemyVisualType,
 } from "../visual/EnemyVisual";
+
+import {
+  CreatureVisual,
+  type CreatureType,
+} from "../visual/CreatureVisual";
+
+export type EnemyKind =
+  | "goblin"
+  | CreatureType;
 
 export class Enemy extends Container {
   maxHp = 5;
@@ -15,24 +23,26 @@ export class Enemy extends Container {
 
   /** Inner container for idle animation & size, so combat tweens on `this` stay untouched. */
   private readonly body: Container;
-  private readonly visual: EnemyVisual;
+
+  private readonly goblin: EnemyVisual;
+  private readonly creatures = new Map<CreatureType, CreatureVisual>();
+  private activeCreature: CreatureVisual | null = null;
 
   private size = 1;
   private idleTime = Math.random() * Math.PI * 2;
 
-  constructor(
-    type: EnemyVisualType = "goblin",
-  ) {
+  constructor() {
     super();
 
     this.body = new Container();
-    this.visual = new EnemyVisual(type);
+    this.goblin = new EnemyVisual("goblin");
 
-    this.body.addChild(this.visual);
+    this.body.addChild(this.goblin);
     this.addChild(this.body);
   }
 
   configure(
+    kind: EnemyKind,
     maxHp: number,
     attackDamage: number,
     tint: number,
@@ -43,7 +53,7 @@ export class Enemy extends Container {
     this.hp = maxHp;
     this.size = size;
 
-    this.visual.tint = tint;
+    this.showKind(kind, tint);
     this.body.scale.set(size);
   }
 
@@ -56,6 +66,8 @@ export class Enemy extends Container {
       this.size * (1 - breathe * 0.5),
       this.size * (1 + breathe),
     );
+
+    this.activeCreature?.animate(this.idleTime);
   }
 
   takeDamage(amount: number): void {
@@ -71,5 +83,37 @@ export class Enemy extends Container {
 
   isDead(): boolean {
     return this.hp <= 0;
+  }
+
+  private showKind(
+    kind: EnemyKind,
+    tint: number,
+  ): void {
+    this.goblin.visible = kind === "goblin";
+
+    for (const creature of this.creatures.values()) {
+      creature.visible = false;
+    }
+
+    this.activeCreature = null;
+
+    if (kind === "goblin") {
+      this.goblin.tint = tint;
+
+      return;
+    }
+
+    let creature = this.creatures.get(kind);
+
+    if (!creature) {
+      creature = new CreatureVisual(kind);
+      this.creatures.set(kind, creature);
+      this.body.addChild(creature);
+    }
+
+    creature.visible = true;
+    creature.tint = tint;
+
+    this.activeCreature = creature;
   }
 }

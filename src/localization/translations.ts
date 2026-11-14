@@ -24,6 +24,9 @@ export const translations = {
       brute: "Goblin Brute",
       shadow: "Shadow Goblin",
       king: "Goblin King",
+      slime: "Toxic Slime",
+      bat: "Fire Bat",
+      golem: "Stone Golem",
     },
 
     end: {
@@ -70,6 +73,9 @@ export const translations = {
       brute: "Goblin Zorba",
       shadow: "Gölge Goblin",
       king: "Goblin Kral",
+      slime: "Zehirli Balçık",
+      bat: "Ateş Yarasası",
+      golem: "Taş Golem",
     },
 
     end: {
