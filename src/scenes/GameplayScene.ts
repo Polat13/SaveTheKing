@@ -19,6 +19,7 @@ import { CombatAnimationController } from "../controllers/CombatAnimationControl
 import { Localization } from "../localization/Localization";
 import { CoinSystem } from "../economy/CoinSystem";
 import { UpgradeSystem } from "../progression/UpgradeSystem";
+import { assetPath } from "../storage/SaveStorage";
 
 export class GameplayScene
   extends Container
@@ -310,7 +311,7 @@ export class GameplayScene
   private async loadBackground(): Promise<void> {
     try {
       const texture = await Assets.load(
-        "/assets/backgrounds/bg.png",
+        assetPath("assets/backgrounds/bg.png"),
       );
 
       this.background.texture =

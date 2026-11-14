@@ -2,6 +2,14 @@ import {
   CoinSystem,
 } from "../economy/CoinSystem";
 
+import {
+  loadNumber,
+  saveNumber,
+} from "../storage/SaveStorage";
+
+const HEALTH_LEVEL_KEY = "upgrade.health";
+const ATTACK_LEVEL_KEY = "upgrade.attack";
+
 export type UpgradeType =
   | "health"
   | "attack";
@@ -9,8 +17,10 @@ export type UpgradeType =
 export class UpgradeSystem {
   private readonly coinSystem: CoinSystem;
 
-  private healthLevel = 0;
-  private attackLevel = 0;
+  private healthLevel =
+    loadNumber(HEALTH_LEVEL_KEY);
+  private attackLevel =
+    loadNumber(ATTACK_LEVEL_KEY);
 
   private readonly baseHealth = 3;
   private readonly baseAttack = 1;
@@ -45,6 +55,8 @@ export class UpgradeSystem {
     if (type === "attack") {
       this.attackLevel++;
     }
+
+    this.save();
 
     return true;
   }
@@ -92,5 +104,27 @@ export class UpgradeSystem {
   reset(): void {
     this.healthLevel = 0;
     this.attackLevel = 0;
+
+    this.save();
+  }
+
+  canUpgrade(
+    type: UpgradeType,
+  ): boolean {
+    return this.coinSystem.canAfford(
+      this.getUpgradeCost(type),
+    );
+  }
+
+  private save(): void {
+    saveNumber(
+      HEALTH_LEVEL_KEY,
+      this.healthLevel,
+    );
+
+    saveNumber(
+      ATTACK_LEVEL_KEY,
+      this.attackLevel,
+    );
   }
 }

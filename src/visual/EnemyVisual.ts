@@ -3,6 +3,8 @@ import {
   Sprite,
 } from "pixi.js";
 
+import { assetPath } from "../storage/SaveStorage";
+
 export type EnemyVisualType =
   | "goblin"
   | "orc"
@@ -23,13 +25,22 @@ export class EnemyVisual extends Sprite {
   private async load(
     type: EnemyVisualType,
   ): Promise<void> {
-    const texture =
-      await Assets.load(
-        `/assets/characters/${type}.png`,
+    try {
+      const texture =
+        await Assets.load(
+          assetPath(
+            `assets/characters/${type}.png`,
+          ),
+        );
+
+      this.texture = texture;
+
+      this.scale.set(0.56);
+    } catch (error) {
+      console.error(
+        `Failed to load enemy visual "${type}":`,
+        error,
       );
-
-    this.texture = texture;
-
-    this.scale.set(0.56);
+    }
   }
 }

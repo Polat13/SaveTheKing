@@ -1,5 +1,12 @@
+import {
+  loadNumber,
+  saveNumber,
+} from "../storage/SaveStorage";
+
+const COINS_KEY = "coins";
+
 export class CoinSystem {
-  private coins = 0;
+  private coins = loadNumber(COINS_KEY);
 
   add(amount: number): void {
     if (amount <= 0) {
@@ -7,6 +14,7 @@ export class CoinSystem {
     }
 
     this.coins += amount;
+    this.save();
   }
 
   spend(amount: number): boolean {
@@ -19,6 +27,7 @@ export class CoinSystem {
     }
 
     this.coins -= amount;
+    this.save();
 
     return true;
   }
@@ -27,7 +36,16 @@ export class CoinSystem {
     return this.coins;
   }
 
+  canAfford(amount: number): boolean {
+    return this.coins >= amount;
+  }
+
   reset(): void {
     this.coins = 0;
+    this.save();
+  }
+
+  private save(): void {
+    saveNumber(COINS_KEY, this.coins);
   }
 }
