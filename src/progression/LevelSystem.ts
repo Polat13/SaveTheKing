@@ -28,24 +28,28 @@ export interface LevelDefinition {
  * Balance notes (king starts with 5 HP / 1 attack,
  * the king always strikes first, +10 coins per hit,
  * first upgrade costs 30):
- *  1 Scout   - 3 hits, king takes 2 dmg -> easy tutorial win, ~50 coins
- *  2 Slime   - winnable without upgrades, trivial with +1 attack
- *  3 Warrior - comfortable after the first upgrade
+ *  Tuned with a combat simulation of three upgrade strategies
+ *  (attack-first, health-first, alternating): levels 1-6 are won
+ *  on the first try, Shadow and the boss cost 2-4 retries in total.
+ *
+ *  1 Scout   - tutorial win, ~50 coins
+ *  2 Slime   - easy
+ *  3 Warrior - easy after the first upgrade
  *  4 Bat     - hits for 2; first fight that punishes ignoring health
- *  5 Brute   - needs 2-3 upgrades
- *  6 Golem   - tank: lots of HP, needs attack upgrades
- *  7 Shadow  - hits for 3; needs balanced upgrades
- *  8 King    - boss, may need a retry or two
+ *  5 Brute   - needs steady upgrades
+ *  6 Golem   - tank: lots of HP, rewards attack upgrades
+ *  7 Shadow  - hits for 3; first likely loss
+ *  8 King    - boss, usually 1-2 retries
  */
 const CHAPTER: readonly Omit<LevelDefinition, "isBoss">[] = [
   { kind: "goblin", nameKey: "enemies.scout", enemyHp: 3, enemyDamage: 1, reward: 20, tint: 0xffffff, size: 1.0 },
   { kind: "slime", nameKey: "enemies.slime", enemyHp: 4, enemyDamage: 1, reward: 25, tint: 0xffffff, size: 0.9 },
   { kind: "goblin", nameKey: "enemies.warrior", enemyHp: 6, enemyDamage: 1, reward: 30, tint: 0xb9f5a8, size: 1.05 },
-  { kind: "bat", nameKey: "enemies.bat", enemyHp: 7, enemyDamage: 2, reward: 40, tint: 0xffffff, size: 0.9 },
-  { kind: "goblin", nameKey: "enemies.brute", enemyHp: 10, enemyDamage: 2, reward: 50, tint: 0xffb36b, size: 1.15 },
+  { kind: "bat", nameKey: "enemies.bat", enemyHp: 8, enemyDamage: 2, reward: 40, tint: 0xffffff, size: 0.9 },
+  { kind: "goblin", nameKey: "enemies.brute", enemyHp: 12, enemyDamage: 2, reward: 50, tint: 0xffb36b, size: 1.15 },
   { kind: "golem", nameKey: "enemies.golem", enemyHp: 15, enemyDamage: 2, reward: 65, tint: 0xffffff, size: 1.0 },
-  { kind: "goblin", nameKey: "enemies.shadow", enemyHp: 14, enemyDamage: 3, reward: 75, tint: 0xa797ff, size: 1.08 },
-  { kind: "goblin", nameKey: "enemies.king", enemyHp: 20, enemyDamage: 3, reward: 120, tint: 0xff6a6a, size: 1.3 },
+  { kind: "goblin", nameKey: "enemies.shadow", enemyHp: 15, enemyDamage: 3, reward: 80, tint: 0xa797ff, size: 1.08 },
+  { kind: "goblin", nameKey: "enemies.king", enemyHp: 18, enemyDamage: 3, reward: 120, tint: 0xff6a6a, size: 1.3 },
 ];
 
 export class LevelSystem {
